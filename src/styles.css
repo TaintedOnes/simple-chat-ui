@@ -1,9 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 
-.row {
+/* .row {
     margin-top: 50px;
     padding-bottom: 50px;
-}
+} */
 
 .ConnectedList {
     /* margin-top: 250px; */
@@ -92,6 +92,7 @@ div.form-group.required>label:first-child:after {
     justify-content: center;
     width: 100%;
     padding: 20px;
+    height: 100vh; /* this sets the height of the parent container to the full height of the viewport */
 }
 
 .wrapped-div {

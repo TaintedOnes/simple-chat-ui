@@ -37,12 +37,12 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       }
     })
 
-
-    this.conversationService.getAll().subscribe((item: any) => {
-      if (item) {
-        this.conversation = item;
+    this.conversationService.getAll().subscribe((items: any[]) => {
+      if (items) {
+        this.conversation = items.sort((a, b) => {
+          return new Date(b.lastMessageDate).getTime() - new Date(a.lastMessageDate).getTime();
+        });
       }
-      console.log('get distinct2' + this.conversation);
     })
 
     this.service.getAll().subscribe(
@@ -100,6 +100,10 @@ export class HomeComponent implements OnInit, AfterViewChecked {
 
     this.hubConnection.on('ReceiveDM', (connectionId, message) => {
       message.type = 'recieved';
+      if (message.chatId != this.chatUser?.chatId) {
+        this.messages.push(message);
+        return;
+      }
       this.displayMessages.push(message);
     })
   }
@@ -127,6 +131,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       };
       console.log('date is -' + msg.messageDate);
       this.displayMessages.push(msg);
+      this.messages.push(msg);
       this.hubConnection.send('SendMessageToUser', msg)
         .then(() => console.log('Message to user Sent Successfully'))
         .catch(err => console.error(err));
@@ -140,7 +145,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     });
     user['isActive'] = true;
     this.chatUser = user;
-    this.displayMessages = this.messages.filter(x => (x.chatId === this.chatUser.chatId));
+    this.displayMessages = this.messages.filter(x => (x.chatId === this.chatUser.chatId) || (x.chatid === this.chatUser.chatId));
   }
 
   makeItOnline() {

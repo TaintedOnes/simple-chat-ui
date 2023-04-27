@@ -82,12 +82,12 @@
 .contacts {
     list-style: none;
     padding: 0;
+    margin-bottom: 0rem;
 }
 
 .contacts li {
     width: 100% !important;
     padding: 5px 10px;
-    margin-bottom: 15px !important;
 }
 
 .contacts li:hover {

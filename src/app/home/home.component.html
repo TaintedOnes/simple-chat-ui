@@ -26,12 +26,12 @@
               </div>
             </li>
           </ul>
-          <div class="input-group">
+          <!-- <div class="input-group">
             <input type="text" placeholder="Search..." name="" class="form-control search">
             <div class="input-group-prepend">
               <span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
             </div>
-          </div>
+          </div> -->
         </div>
         <div class="card-body contacts_body">
           <ul class="contacts">
@@ -122,8 +122,8 @@
             <div class="input-group-append">
               <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
             </div>
-            <textarea name="" [(ngModel)]="message" class="form-control type_msg"
-              placeholder="Type your message..."></textarea>
+            <input name="" [(ngModel)]="message" class="form-control type_msg" placeholder="Type your message..."
+              (keydown.enter)="SendDirectMessage()">
             <div class="input-group-append" (click)="SendDirectMessage()">
               <span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
             </div>

@@ -8,7 +8,7 @@
 }
 
 .card {
-    height: 500px;
+    height: 90vh;
 }
 
 .contacts_body {
@@ -330,4 +330,10 @@
 }
 .mouseCursor{
     cursor: pointer;
+}
+
+.parent-container {
+  display: flex;
+  align-items: center;
+  height: 100vh; /* this sets the height of the parent container to the full height of the viewport */
 }

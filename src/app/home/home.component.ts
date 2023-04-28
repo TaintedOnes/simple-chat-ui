@@ -35,14 +35,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         })
         console.log(this.messages);
       }
-    })
-
-    this.conversationService.getAll().subscribe((items: any[]) => {
-      if (items) {
-        this.conversation = items.sort((a, b) => {
-          return new Date(b.lastMessageDate).getTime() - new Date(a.lastMessageDate).getTime();
-        });
-      }
+      this.checkUnread();
     })
 
     this.service.getAll().subscribe(
@@ -59,8 +52,6 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         console.log(err);
       },
     );
-
-
 
 
     this.message = ''
@@ -83,6 +74,18 @@ export class HomeComponent implements OnInit, AfterViewChecked {
           });
           this.makeItOnline();
         })
+        this.hubConnection.on("NewMessage", chatId => {
+          if (this.chatUser?.chatId === chatId) {
+            this.markMessageAsRead(chatId);
+          }
+          else {
+            const conversation = this.conversation.find(c => c.chatId === chatId);
+            if (conversation) {
+              conversation.isUnread = true;
+              this.checkUnread();
+            }
+          }
+        })
       })
       .catch(err => console.log(err));
 
@@ -95,16 +98,41 @@ export class HomeComponent implements OnInit, AfterViewChecked {
           this.displayMessages = this.messages.filter(x => (x.type === 'sent' && x.receiver === this.chatUser.id) || (x.type === 'recieved' && x.sender === this.chatUser.id));
         }
       }
-
     })
 
     this.hubConnection.on('ReceiveDM', (connectionId, message) => {
       message.type = 'recieved';
+
       if (message.chatId != this.chatUser?.chatId) {
         this.messages.push(message);
         return;
       }
       this.displayMessages.push(message);
+    })
+  }
+
+  checkUnread() {
+    this.conversationService.getAll().subscribe((items: any[]) => {
+      if (items) {
+        this.conversation = items.sort((a, b) => {
+          return new Date(b.lastMessageDate).getTime() - new Date(a.lastMessageDate).getTime();
+        });
+      }
+      this.markUnread();
+    })
+  }
+
+  markUnread() {
+    const markedChatIds = [];
+    this.messages.forEach(item => {
+      item['isActive'] = false;
+      if (item['isNew'] === true && !markedChatIds.includes(item['chatId'])) {
+        const conversation = this.conversation.find(c => c.chatId === item['chatId']);
+        if (conversation) {
+          conversation.isUnread = true;
+          markedChatIds.push(conversation.chatId);
+        }
+      }
     })
   }
 
@@ -129,7 +157,6 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         type: 'sent',
         content: this.message
       };
-      console.log('date is -' + msg.messageDate);
       this.displayMessages.push(msg);
       this.messages.push(msg);
       this.hubConnection.send('SendMessageToUser', msg)
@@ -139,7 +166,17 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  markMessageAsRead(chatId) {
+    this.hubConnection.send('MarkAllUnreadMessage', chatId)
+      .then(() => console.log('MarkAllUnreadMessage Sent Successfully'))
+      .catch(err => console.error(err));
+  }
+
   openChat(user) {
+    if (user.isUnread === true) {
+      this.markMessageAsRead(user.chatId);
+      user.isUnread = false;
+    }
     this.users.forEach(item => {
       item['isActive'] = false;
     });

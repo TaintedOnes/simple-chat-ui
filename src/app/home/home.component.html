@@ -9,8 +9,7 @@
               <li class="">
                 <div class="d-flex bd-highlight">
                   <div class="img_cont">
-                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
-                      class="rounded-circle user_img">
+                    <img src="/assets/img/monkey.png" class="rounded-circle user_img">
                     <span class="online_icon"></span>
                   </div>
                   <div class="user_info">
@@ -22,7 +21,7 @@
                   <i class="fa fa-ellipsis-h fa-pull-right" aria-hidden="true" id="dropdownMenuButton"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
                   <ul class="dropdown-menu dropdown-menu-right menuList" aria-labelledby="dropdownMenuButton">
-                    <li><a class="dropdown-item" href="#">My Profile</a></li>
+                    <!-- <li><a class="dropdown-item" href="#">My Profile</a></li> -->
                     <li><a class="dropdown-item" style="cursor: pointer;" (click)="onLogout()">Logout</a></li>
                   </ul>
                 </div>
@@ -38,20 +37,19 @@
           <div class="card-body contacts_body">
             <ul class="contacts">
               <!-- <li style="cursor: pointer;" [class.active]="item.isActive" *ngFor="let item of users" -->
-              <li style="cursor: pointer;" *ngFor="let item of conversation" (click)="openChat(item)">
-                <div class="d-flex bd-highlight">
+              <li style="cursor: pointer;" [class.active]="item === chatUser || item.chatId === chatUser?.chatId"
+                *ngFor="let item of conversation" (click)="openChat(item)">
+                <div class=" d-flex bd-highlight">
                   <div class="img_cont">
-                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
-                      class="rounded-circle user_img">
+                    <img src="/assets/img/monkey.png" class="rounded-circle user_img">
                     <!-- <span class="online_icon" [class.offline]="!item.isOnline"></span> -->
                   </div>
                   <div class="user_info">
                     <span>{{item.firstName}} {{item.lastName}}</span>
-
                   </div>
+                  <div class="ChatBadge unread" *ngIf="item.isUnread"><span>new</span></div>
                 </div>
               </li>
-
             </ul>
           </div>
           <!-- <div class="card-footer"></div> -->
@@ -62,8 +60,7 @@
           <div class="card-header msg_head ">
             <div class="d-flex bd-highlight">
               <div class="img_cont">
-                <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img"
-                  *ngIf="chatUser">
+                <img src="/assets/img/monkey.png" class="rounded-circle user_img" *ngIf="chatUser">
                 <!-- <span class="online_icon"></span> -->
               </div>
               <div class="user_info" *ngIf="chatUser">
@@ -85,8 +82,7 @@
                 </section>
                 <div class="d-flex justify-content-start mb-4" *ngIf="m.type==='recieved' && !m.isReceiverDeleted">
                   <div class="img_cont_msg">
-                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
-                      class="rounded-circle user_img_msg">
+                    <img src="/assets/img/monkey.png" class="rounded-circle user_img_msg">
                   </div>
                   <div class="msg_cotainer">
                     {{m.content}}
@@ -114,8 +110,7 @@
                     <span class="msg_time_send">{{formatDate(m.messageDate)}}</span>
                   </div>
                   <div class="img_cont_msg">
-                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
-                      class="rounded-circle user_img_msg">
+                    <img src="/assets/img/monkey.png" class="rounded-circle user_img_msg">
                   </div>
                 </div>
               </div>

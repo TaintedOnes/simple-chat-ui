@@ -31,9 +31,8 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       if (item) {
         this.messages = item;
         this.messages.forEach(x => {
-          x.type = x.sender === this.loggedInUser.id ? 'sent' : 'recieved';
+          x.type = x.sender === "Q!n057TSn6@w" ? 'sent' : 'recieved';
         })
-        console.log(this.messages);
       }
       this.checkUnread();
     })
@@ -82,8 +81,8 @@ export class HomeComponent implements OnInit, AfterViewChecked {
             const conversation = this.conversation.find(c => c.chatId === chatId);
             if (conversation) {
               conversation.isUnread = true;
-              this.checkUnread();
             }
+            this.checkUnread();
           }
         })
       })
@@ -98,6 +97,19 @@ export class HomeComponent implements OnInit, AfterViewChecked {
           this.displayMessages = this.messages.filter(x => (x.type === 'sent' && x.receiver === this.chatUser.id) || (x.type === 'recieved' && x.sender === this.chatUser.id));
         }
       }
+    })
+
+    this.hubConnection.on('SentDM', (connectionId, message) => {
+      message.type = 'sent';
+      const lastMessage = this.messages.slice(-1)[0];
+      if (lastMessage.content === message.content) {
+        return;
+      }
+      if (message.chatId != this.chatUser?.chatId) {
+        this.messages.push(message);
+        return;
+      }
+      this.displayMessages.push(message);
     })
 
     this.hubConnection.on('ReceiveDM', (connectionId, message) => {
@@ -151,8 +163,8 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       let guid = Guid.create();
       var msg = {
         chatid: this.chatUser.chatId,
-        sender: this.loggedInUser.id,
-        receiver: this.loggedInUser.id,
+        sender: "Q!n057TSn6@w",
+        receiver: "Q!n057TSn6@w",
         messageDate: new Date(),
         type: 'sent',
         content: this.message
@@ -176,6 +188,11 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     if (user.isUnread === true) {
       this.markMessageAsRead(user.chatId);
       user.isUnread = false;
+      this.messages.forEach(message => {
+        if (message.chatId === user.chatId && message.isNew) {
+          message.isNew = false;
+        }
+      });
     }
     this.users.forEach(item => {
       item['isActive'] = false;

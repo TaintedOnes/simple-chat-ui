@@ -75,8 +75,9 @@
                   <i *ngIf="m.type==='recieved'" class="fa fa-ellipsis-h messageListIcon" aria-hidden="true"
                     style="display: none;" id="{{m.id}}" data-toggle="dropdown" aria-haspopup="true"
                     aria-expanded="false"></i>
-                  <ul class="dropdown-menu userList" aria-labelledby="{{m.id}}">
-                    <li><a class="dropdown-item mouseCursor" (click)="deleteMessage(m,'DeleteForMe',false)">Remove Only
+                  <ul class="dropdown-menu userList">
+                    <li><a class=" dropdown-item mouseCursor" (click)="deleteMessage(m,'DeleteForMe',false)">Remove
+                        Only
                         For Me</a></li>
                   </ul>
                 </section>
@@ -95,8 +96,8 @@
                   <i *ngIf="m.type==='sent'" class="fa fa-ellipsis-h messageListIcon" aria-hidden="true"
                     style="display: none;" id="{{m.id}}" data-toggle="dropdown" aria-haspopup="true"
                     aria-expanded="false"></i>
-                  <ul class="dropdown-menu userList" aria-labelledby="{{m.id}}">
-                    <li><a class="dropdown-item mouseCursor" (click)="deleteMessage(m,'DeleteForMe',true)">Remove Only
+                  <ul class="dropdown-menu userList">
+                    <li><a class=" dropdown-item mouseCursor" (click)="deleteMessage(m,'DeleteForMe',true)">Remove Only
                         For
                         Me</a></li>
                     <li><a class="dropdown-item mouseCursor" (click)="deleteMessage(m,'DeleteForEveryone',true)">Remove

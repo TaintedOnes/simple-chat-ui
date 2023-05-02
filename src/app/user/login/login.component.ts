@@ -15,7 +15,8 @@ declare let tsParticles: any; // Required to be properly interpreted by TypeScri
 export class LoginComponent implements OnInit {
   formModel = {
     UserName: '',
-    Password: ''
+    Password: '',
+    Email: ''
   }
   constructor(private service: UserService, private router: Router, private toastr: ToastrService) { }
 

@@ -361,3 +361,11 @@
 .contacts_body .bd-highlight{
   align-items: center;
 }
+#imgUploadThumbnail{
+    max-width: max-content;
+    overflow: hidden;
+}
+#imgUploadThumbnail img{
+    max-width: 200px;
+    max-height: 200px;
+}

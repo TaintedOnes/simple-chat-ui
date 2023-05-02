@@ -3,6 +3,9 @@ import { UserService } from '../../service/user.service';
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ParticlesConfig } from '../../service/particles-config';
+
+declare let tsParticles: any; // Required to be properly interpreted by TypeScript.
 
 @Component({
   selector: 'app-login',
@@ -17,8 +20,13 @@ export class LoginComponent implements OnInit {
   constructor(private service: UserService, private router: Router, private toastr: ToastrService) { }
 
   ngOnInit() {
+    this.invokeParticles();
     if (localStorage.getItem('token') != null)
       this.router.navigateByUrl('/home');
+  }
+
+  public invokeParticles(): void {
+    tsParticles.load("tsparticles2", ParticlesConfig)
   }
 
   onSubmit(form: NgForm) {

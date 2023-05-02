@@ -1,5 +1,6 @@
 import { UserService } from '../service/user.service';
 import { Component, OnInit, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
+import { HttpClient, HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
 import { environment } from 'src/environments/environment';
@@ -14,6 +15,7 @@ import { Guid } from 'guid-typescript';
 })
 export class HomeComponent implements OnInit, AfterViewChecked {
   @ViewChild('messageContainer') messageContainer: ElementRef;
+  @ViewChild('fileInput') fileInput: ElementRef<HTMLInputElement>;
   loggedInUser = JSON.parse(localStorage.getItem("login-user"))
   users: any;
   chatUser: any;
@@ -22,9 +24,10 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   message: string
   hubConnection: HubConnection;
   conversation: any;
+  imageSrc: string;
 
   connectedUsers: any[] = []
-  constructor(private router: Router, private service: UserService, private messageService: MessageService, private conversationService: ConversationService) { }
+  constructor(private router: Router, private service: UserService, private messageService: MessageService, private conversationService: ConversationService, private http:HttpClient) { }
 
   ngOnInit() {
     this.messageService.getUserReceivedMessages(this.loggedInUser.id).subscribe((item: any) => {
@@ -159,6 +162,10 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   }
 
   SendDirectMessage() {
+    if(this.imageSrc != '' && this.fileInput.nativeElement.value != ''){
+      this.UploadFile();
+    }
+
     if (this.message != '' && this.message.trim() != '') {
       let guid = Guid.create();
       var msg = {
@@ -167,7 +174,8 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         receiver: "Q!n057TSn6@w",
         messageDate: new Date(),
         type: 'sent',
-        content: this.message
+        content: this.message,
+        contentType : 1
       };
       this.displayMessages.push(msg);
       this.messages.push(msg);
@@ -246,5 +254,54 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       hour12: true
     });
     return formatter.format(new Date(date));
+  }
+
+  onFileChange(event) {
+    const reader = new FileReader();
+    if(event.target.files && event.target.files.length) {
+      const [file] = event.target.files;
+      reader.readAsDataURL(file);
+    
+      reader.onload = () => {
+        this.imageSrc = reader.result as string;
+      };
+    }
+  }
+
+  ResetFile(){
+    this.imageSrc = '';
+    this.fileInput.nativeElement.value = '';
+  }
+
+  UploadFile(){
+    let fileToUpload = <File>this.fileInput.nativeElement.files[0];
+    const formData = new FormData();
+    formData.append('ChatID', this.chatUser.chatId);
+    formData.append('ImgFile', fileToUpload, fileToUpload.name);
+    this.http.post(environment.apiBaseUrl + '/message/uploadImg', formData, {reportProgress: true, observe: 'events'})
+      .subscribe({
+        next: (event) => {
+          if(event.type === HttpEventType.UploadProgress){
+            //update progress ui
+            //this.progress = Math.round(100 * event.loaded / event.total);
+          }else if(event.type === HttpEventType.Response){
+            var msg = {
+              chatid: this.chatUser.chatId,
+              sender: this.loggedInUser.id,
+              receiver: this.loggedInUser.id,
+              messageDate: new Date(),
+              type: 'sent',
+              content: event.body["result"],
+              contentType : 2
+            };
+            console.log('date is -' + msg.messageDate);
+            this.displayMessages.push(msg);
+            this.hubConnection.send('SendPhotoToUser', msg)
+              .then(() => console.log('Photo to user Sent Successfully'))
+              .catch(err => console.error(err));
+            this.ResetFile();
+          }
+        }, error: (err: HttpErrorResponse) => console.log(err)
+      });
   }
 }

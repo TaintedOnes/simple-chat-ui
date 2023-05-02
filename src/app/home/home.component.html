@@ -4,7 +4,6 @@
       <div class="col-md-4 col-xl-3 chat">
         <div class="card mb-sm-3 mb-md-0 contacts_card" style="z-index: 1;">
           <div class="card-header">
-
             <ul class="contacts">
               <li class="">
                 <div class="d-flex bd-highlight">
@@ -85,11 +84,15 @@
                   <div class="img_cont_msg">
                     <img src="/assets/img/monkey.png" class="rounded-circle user_img_msg">
                   </div>
-                  <div class="msg_cotainer">
+                  <div class="msg_cotainer" *ngIf="m.contentType !== 2">
                     {{m.content}}
                     <span class="msg_time">{{formatDate(m.messageDate)}}</span>
                   </div>
+                  <div class="msg_cotainer" *ngIf="m.contentType === 2">
+                  <img class="images" src={{m.content}} style="max-width: 300px;max-height:300px;"/>
+                  <span class="msg_time">{{formatDate(m.messageDate)}}</span>
                 </div>
+              </div>
               </div>
               <div class="messageItem">
                 <section>
@@ -106,11 +109,15 @@
                 </section>
 
                 <div class="d-flex justify-content-end mb-4" *ngIf="m.type==='sent' && !m.isSenderDeleted">
-                  <div class="msg_cotainer_send">
+                  <div class="msg_cotainer_send" *ngIf="m.contentType !== 2">
                     {{m.content}}
                     <span class="msg_time_send">{{formatDate(m.messageDate)}}</span>
                   </div>
-                  <div class="img_cont_msg">
+                  <div class="msg_cotainer_send" *ngIf="m.contentType === 2">
+                  <img class="images" src={{m.content}} style="max-width: 300px;max-height:300px;"/>
+                  <span class="msg_time_send">{{formatDate(m.messageDate)}}</span>
+                </div>
+                <div class="img_cont_msg">
                     <img src="/assets/img/monkey.png" class="rounded-circle user_img_msg">
                   </div>
                 </div>
@@ -118,9 +125,18 @@
 
             </div>
           </div>
+          <div class="card-footer" *ngIf="imageSrc">
+            <div id="imgUploadThumbnail">
+              <button type="button" class="close float-right" aria-label="Close" style="outline: none !important;" (click)="ResetFile()">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <img [src]="imageSrc" class="img-thumbnail">
+            </div>
+          </div>
           <div class="card-footer" *ngIf="chatUser">
             <div class="input-group">
-              <div class="input-group-append">
+              <div class="input-group-append" (click)="fileInput.click()">
+              <input style="display: none;" type="file" id="fileInput" name="file" (change)="onFileChange($event)" #fileInput>
                 <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
               </div>
               <input name="" [(ngModel)]="message" class="form-control type_msg" placeholder="Type your message..."

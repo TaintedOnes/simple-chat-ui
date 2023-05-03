@@ -2,7 +2,7 @@ import { UserService } from '../service/user.service';
 import { Component, OnInit, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
+import { HubConnection, HubConnectionBuilder, LogLevel, HubConnectionState } from '@microsoft/signalr';
 import { environment } from 'src/environments/environment';
 import { MessageService } from '../service/message.service';
 import { ConversationService } from '../service/conversation.service';
@@ -27,7 +27,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   imageSrc: string;
 
   connectedUsers: any[] = []
-  constructor(private router: Router, private service: UserService, private messageService: MessageService, private conversationService: ConversationService, private http:HttpClient) { }
+  constructor(private router: Router, private service: UserService, private messageService: MessageService, private conversationService: ConversationService, private http: HttpClient) { }
 
   ngOnInit() {
     this.messageService.getUserReceivedMessages(this.loggedInUser.id).subscribe((item: any) => {
@@ -57,7 +57,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
 
 
     this.message = ''
-    this.hubConnection = new HubConnectionBuilder().withUrl(environment.chatHubUrl).build();
+    this.hubConnection = new HubConnectionBuilder().withUrl(environment.chatHubUrl).configureLogging(LogLevel.Debug).build();
     const self = this
     this.hubConnection.start()
       .then(() => {
@@ -90,6 +90,15 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         })
       })
       .catch(err => console.log(err));
+
+    this.hubConnection.onclose(() => {
+      if (this.hubConnection.state === HubConnectionState.Disconnected) {
+        const lastError = this.hubConnection['lastError'];
+        if (lastError) {
+          console.log(`Disconnected. Reason: ${lastError.message}`);
+        }
+      }
+    });
 
     this.hubConnection.on('BroadCastDeleteMessage', (connectionId, message) => {
       let deletedMessage = this.messages.find(x => x.id === message.id);
@@ -162,7 +171,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   }
 
   SendDirectMessage() {
-    if(this.imageSrc != '' && this.fileInput.nativeElement.value != ''){
+    if (this.imageSrc != '' && this.fileInput.nativeElement.value != '') {
       this.UploadFile();
     }
 
@@ -175,7 +184,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         messageDate: new Date(),
         type: 'sent',
         content: this.message,
-        contentType : 1
+        contentType: 1
       };
       this.displayMessages.push(msg);
       this.messages.push(msg);
@@ -258,33 +267,33 @@ export class HomeComponent implements OnInit, AfterViewChecked {
 
   onFileChange(event) {
     const reader = new FileReader();
-    if(event.target.files && event.target.files.length) {
+    if (event.target.files && event.target.files.length) {
       const [file] = event.target.files;
       reader.readAsDataURL(file);
-    
+
       reader.onload = () => {
         this.imageSrc = reader.result as string;
       };
     }
   }
 
-  ResetFile(){
+  ResetFile() {
     this.imageSrc = '';
     this.fileInput.nativeElement.value = '';
   }
 
-  UploadFile(){
+  UploadFile() {
     let fileToUpload = <File>this.fileInput.nativeElement.files[0];
     const formData = new FormData();
     formData.append('ChatID', this.chatUser.chatId);
     formData.append('ImgFile', fileToUpload, fileToUpload.name);
-    this.http.post(environment.apiBaseUrl + '/message/uploadImg', formData, {reportProgress: true, observe: 'events'})
+    this.http.post(environment.apiBaseUrl + '/message/uploadImg', formData, { reportProgress: true, observe: 'events' })
       .subscribe({
         next: (event) => {
-          if(event.type === HttpEventType.UploadProgress){
+          if (event.type === HttpEventType.UploadProgress) {
             //update progress ui
             //this.progress = Math.round(100 * event.loaded / event.total);
-          }else if(event.type === HttpEventType.Response){
+          } else if (event.type === HttpEventType.Response) {
             var msg = {
               chatid: this.chatUser.chatId,
               sender: this.loggedInUser.id,
@@ -292,7 +301,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
               messageDate: new Date(),
               type: 'sent',
               content: event.body["result"],
-              contentType : 2
+              contentType: 2
             };
             console.log('date is -' + msg.messageDate);
             this.displayMessages.push(msg);

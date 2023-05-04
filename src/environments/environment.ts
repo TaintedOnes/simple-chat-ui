@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:64646/api',
-  chatHubUrl: "http://localhost:64646/chathub"
+  apiBaseUrl: 'http://localhost:8102/api',
+  chatHubUrl: "http://localhost:8102/chathub"
 };
 
 /*

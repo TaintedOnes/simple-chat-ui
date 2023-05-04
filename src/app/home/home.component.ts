@@ -2,11 +2,12 @@ import { UserService } from '../service/user.service';
 import { Component, OnInit, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { HubConnection, HubConnectionBuilder, LogLevel, HubConnectionState } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
 import { environment } from 'src/environments/environment';
 import { MessageService } from '../service/message.service';
 import { ConversationService } from '../service/conversation.service';
-import { Guid } from 'guid-typescript';
+import { interval, Subscription } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-home',
@@ -25,6 +26,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   hubConnection: HubConnection;
   conversation: any;
   imageSrc: string;
+  reconnectionSubscription: Subscription;
 
   connectedUsers: any[] = []
   constructor(private router: Router, private service: UserService, private messageService: MessageService, private conversationService: ConversationService, private http: HttpClient) { }
@@ -92,12 +94,8 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       .catch(err => console.log(err));
 
     this.hubConnection.onclose(() => {
-      if (this.hubConnection.state === HubConnectionState.Disconnected) {
-        const lastError = this.hubConnection['lastError'];
-        if (lastError) {
-          console.log(`Disconnected. Reason: ${lastError.message}`);
-        }
-      }
+      console.warn("connection closed");
+      this.reconnect();
     });
 
     this.hubConnection.on('BroadCastDeleteMessage', (connectionId, message) => {
@@ -133,6 +131,26 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       }
       this.displayMessages.push(message);
     })
+  }
+
+  reconnect(): void {
+    if (!this.reconnectionSubscription || this.reconnectionSubscription.closed) {
+      this.reconnectionSubscription = interval(0)
+        .pipe(switchMap(() => this.hubConnection.start()))
+        .subscribe(
+          () => {
+            console.log('SignalR reconnected.');
+            this.stopReconnecting();
+          },
+          (error: Error) => console.error(`Error while reconnecting SignalR: ${error}`)
+        );
+    }
+  }
+
+  stopReconnecting(): void {
+    if (this.reconnectionSubscription && !this.reconnectionSubscription.closed) {
+      this.reconnectionSubscription.unsubscribe();
+    }
   }
 
   checkUnread() {
@@ -176,7 +194,6 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     }
 
     if (this.message != '' && this.message.trim() != '') {
-      let guid = Guid.create();
       var msg = {
         chatid: this.chatUser.chatId,
         sender: "Q!n057TSn6@w",

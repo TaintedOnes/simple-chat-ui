@@ -115,20 +115,13 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       if (lastMessage.content === message.content) {
         return;
       }
-      if (message.chatId != this.chatUser?.chatId) {
-        this.messages.push(message);
-        return;
-      }
+      this.messages.push(message);
       this.displayMessages.push(message);
     })
 
     this.hubConnection.on('ReceiveDM', (connectionId, message) => {
       message.type = 'recieved';
-
-      if (message.chatId != this.chatUser?.chatId) {
-        this.messages.push(message);
-        return;
-      }
+      this.messages.push(message);
       this.displayMessages.push(message);
     })
   }

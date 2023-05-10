@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'http://localhost:8100/api',
-  chatHubUrl: "http://localhost:8100/chathub"
+  apiBaseUrl: 'https://tgback.mak3990.net:8443/api',
+  chatHubUrl: "https://tgback.mak3990.net:8443/chathub"
 };
